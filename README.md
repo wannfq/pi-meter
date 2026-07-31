@@ -10,6 +10,9 @@ shows provider allowance windows in a compact `/meter` overlay.
 - Shows xAI SuperGrok's shared weekly usage through Pi's SuperGrok / X Premium
   OAuth login.
 - Keeps successful provider readings visible when another provider fails.
+- Shows Claude as awaiting-interface support while Anthropic's allowance API
+  remains unpublished.
+- Keeps OpenCode Go as `awaiting-interface` until a public quota API exists.
 - Fetches only when `/meter` opens or you request a refresh. It performs no
   startup requests or background polling.
 

@@ -12,14 +12,16 @@ public registry, provider SDK, or third-party extension interface.
 - **OpenAI Codex** is live with `first-party-source` evidence. It uses Pi's
   `openai-codex` authentication and OpenAI's source-reviewed ChatGPT usage
   route.
+- **Claude** is `awaiting-interface`. Waiting for Anthropic to publish a
+  supported Claude allowance interface.
+- **OpenCode Go** remains `awaiting-interface` until a first-party allowance
+  interface replaces dashboard scraping.
 - **xAI SuperGrok** is live with `first-party-source` evidence. It accepts only
   Pi's xAI OAuth login, obtains the required user routing ID and plan through
   xAI's source-reviewed fixed-origin `/user?include=subscription` request, then
   reads the shared allowance from `/billing?format=credits`. An xAI API key must
   never be sent to the
   consumer origin.
-- **OpenCode Go** remains `awaiting-interface` until a first-party allowance
-  interface replaces dashboard scraping.
 
 ## Choose the support path
 

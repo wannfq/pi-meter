@@ -16,6 +16,9 @@ Private design notes live in the gitignored `design/` directory. When that
 local directory is available, consult its package design, domain model,
 glossary, ADRs, and provider research before changing behavior. Do not add
 links from public documentation to these local files.
+For Claude provider work, consult
+[`design/research/claude-subscription-allowance-interface.md`](design/research/claude-subscription-allowance-interface.md);
+it records the failed evidence gate and the conditions for reconsideration.
 
 When code and documentation disagree, preserve safety and domain invariants,
 then update the relevant public documentation and local design notes in the
@@ -23,9 +26,9 @@ same change.
 
 ## Project structure
 
-- `src/index.ts` — Pi composition root, built-in provider order, awaiting-interface
-  definitions, and `/meter` registration. Keep live provider construction lazy
-  so startup performs no auth or network work.
+- `src/index.ts` — Pi composition root, built-in provider order,
+  awaiting-interface definitions, and `/meter` registration. Keep live provider
+  construction lazy so startup performs no auth or network work.
 - `src/meter.ts` — deep meter module. Owns refresh coordination, cache,
   freshness, request floors, cancellation, notifications, and snapshots.
 - `src/providers/openai-codex.ts` — OpenAI Codex auth, fixed-origin request,
@@ -80,6 +83,8 @@ Preserve these MVP decisions:
 - No credential storage, direct Pi auth-file reads, browser-cookie extraction,
   or dashboard scraping.
 - No OpenCode Go I/O until an accepted first-party allowance interface exists.
+- No Claude subscription allowance I/O until Anthropic publishes a qualifying
+  first-party interface and permitted credential-use contract.
 - No generic UI port, provider SDK, HTTP client hierarchy, DI container,
   bundler, or new framework without a concrete need.
 
@@ -93,6 +98,9 @@ contract tests, composition wiring, and documentation.
 - Send requests only to the fixed, source-backed OpenAI/ChatGPT origin.
 - Keep OpenAI request and decoding behavior aligned with the reviewed
   first-party source.
+- Claude currently has no auth resolver, OAuth detector, fetch path, or
+  credential detection; keep it `awaiting-interface` until the evidence gate
+  passes.
 - Decode remote payloads strictly. Reject malformed values and schema drift as
   `invalid-response`; never convert missing or invalid allowance data to zero.
 - Treat all provider strings as untrusted terminal input. Reject control
@@ -138,6 +146,9 @@ implementation details.
 - Overlay changes: cover command guards, all visible states, refresh feedback,
   close keys, disposal, repaint suppression, timers, ANSI width, Unicode width,
   and narrow terminals.
+- Awaiting-interface changes: verify the exact support state, stable ID,
+  display name, explanation, absence of a source, and absence of auth or
+  network I/O.
 - Any bug fix must include a regression test. Boundary validation should test
   accepted and rejected edges.
 - Keep tests deterministic: use fake time, injected dependencies, and deferred

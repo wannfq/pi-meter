@@ -1,6 +1,6 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
-import { createMeter, type Meter } from "./meter.js";
+import { createMeter, type Meter, type ProviderDefinition } from "./meter.js";
 import {
 	createOpenAiCodexProvider,
 	OPENAI_CODEX_PROVIDER_ID,
@@ -10,6 +10,20 @@ import {
 	XAI_PROVIDER_ID,
 } from "./providers/xai-supergrok.js";
 import { showMeterOverlay } from "./ui/meter-overlay.js";
+
+const CLAUDE_PROVIDER = {
+	support: "awaiting-interface",
+	id: "anthropic",
+	displayName: "Claude",
+	explanation: "Waiting for Anthropic to publish a supported Claude allowance interface",
+} satisfies ProviderDefinition;
+
+const OPENCODE_GO_PROVIDER = {
+	support: "awaiting-interface",
+	id: "opencode-go",
+	displayName: "OpenCode Go",
+	explanation: "Waiting for a public OpenCode Go quota API",
+} satisfies ProviderDefinition;
 
 /** Pi package entry point. Provider work starts only when /meter opens. */
 export default function meterExtension(pi: ExtensionAPI): void {
@@ -39,24 +53,13 @@ export default function meterExtension(pi: ExtensionAPI): void {
 				}
 			};
 
-			let openAiAuth;
-			try {
-				openAiAuth = await ctx.modelRegistry.getProviderAuth(
-					OPENAI_CODEX_PROVIDER_ID,
-				);
-			} catch {
-				openAiAuth = undefined;
-			}
-			if (!openAiAuth && !isUsingXaiOAuth()) {
-				ctx.ui.notify("No authenticated providers available", "info");
-				return;
-			}
-
 			meter ??= createMeter([
 				createOpenAiCodexProvider({
 					resolveAuth: () =>
 						ctx.modelRegistry.getProviderAuth(OPENAI_CODEX_PROVIDER_ID),
 				}),
+				CLAUDE_PROVIDER,
+				OPENCODE_GO_PROVIDER,
 				createXaiSuperGrokProvider({
 					isUsingOAuth: isUsingXaiOAuth,
 					resolveAuth: () => ctx.modelRegistry.getProviderAuth(XAI_PROVIDER_ID),

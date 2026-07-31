@@ -6,6 +6,26 @@ import type {
 import type { Component } from "@earendil-works/pi-tui";
 import { describe, expect, it, vi } from "vitest";
 
+import type { Meter } from "./meter.js";
+import type * as MeterOverlayModule from "./ui/meter-overlay.js";
+
+type ShowMeterOverlay = typeof MeterOverlayModule.showMeterOverlay;
+const capturedState: { meter?: Meter } = {};
+
+vi.mock("./ui/meter-overlay.js", async () => {
+	const actual =
+		await vi.importActual<typeof MeterOverlayModule>("./ui/meter-overlay.js");
+	return {
+		...actual,
+		showMeterOverlay: async (
+			...args: Parameters<ShowMeterOverlay>
+		): Promise<void> => {
+			capturedState.meter = args[1];
+			await actual.showMeterOverlay(...args);
+		},
+	};
+});
+
 import meterExtension from "./index.js";
 
 interface RegisteredCommand {
@@ -147,21 +167,47 @@ describe("pi-meter extension composition", () => {
 		expect(getProviderAuth).not.toHaveBeenCalled();
 	});
 
-	it("does not show providers without resolved user authentication", async () => {
+	it("opens unauthenticated TUI with awaiting providers", async () => {
+		capturedState.meter = undefined;
 		const { command } = registerExtension();
-		const { ctx, custom, getAll, getProviderAuth, isUsingOAuth, notify } =
-			context("tui");
+		const { ctx, custom, getProviderAuth, renders } = context("tui");
 
 		await command.handler("", ctx);
 
-		expect(getProviderAuth).toHaveBeenCalledWith("openai-codex");
-		expect(getAll).toHaveBeenCalledTimes(1);
-		expect(isUsingOAuth).toHaveBeenCalledTimes(1);
-		expect(custom).not.toHaveBeenCalled();
-		expect(notify).toHaveBeenCalledWith(
-			"No authenticated providers available",
-			"info",
+		expect(custom).toHaveBeenCalledTimes(1);
+		expect(capturedState.meter).toBeDefined();
+		const meter = capturedState.meter!;
+		expect(meter.snapshot().map(({ id }) => id)).toEqual([
+			"openai-codex",
+			"anthropic",
+			"opencode-go",
+			"xai",
+		]);
+		expect(meter.snapshot()).toEqual(
+			expect.arrayContaining([
+				{
+					support: "awaiting-interface",
+					id: "anthropic",
+					displayName: "Claude",
+					explanation:
+						"Waiting for Anthropic to publish a supported Claude allowance interface",
+				},
+				{
+					support: "awaiting-interface",
+					id: "opencode-go",
+					displayName: "OpenCode Go",
+					explanation: "Waiting for a public OpenCode Go quota API",
+				},
+			]),
 		);
+		expect(getProviderAuth).not.toHaveBeenCalledWith("anthropic");
+		expect(getProviderAuth).not.toHaveBeenCalledWith("opencode-go");
+		const rendered = renders[0]?.join("\n") ?? "";
+		const renderedText = rendered.replaceAll("│", " ").replace(/\s+/g, " ");
+		expect(renderedText).toContain(
+			"Waiting for Anthropic to publish a supported Claude allowance interface",
+		);
+		expect(renderedText).toContain("Waiting for a public OpenCode Go quota API");
 	});
 
 	it.each([
@@ -175,9 +221,22 @@ describe("pi-meter extension composition", () => {
 
 		expect(custom).toHaveBeenCalledTimes(1);
 		const rendered = renders[0]?.join("\n") ?? "";
+		const renderedText = rendered.replaceAll("│", " ").replace(/\s+/g, " ");
+		expect(renderedText).toContain(
+			"Waiting for Anthropic to publish a supported Claude allowance interface",
+		);
+		expect(renderedText).toContain("Waiting for a public OpenCode Go quota API");
 		expect(rendered).toContain("OpenAI Codex");
+		expect(rendered).toContain("Claude");
+		expect(rendered).toContain("OpenCode Go");
 		expect(rendered).toContain("xAI SuperGrok");
 		expect(rendered.indexOf("OpenAI Codex")).toBeLessThan(
+			rendered.indexOf("Claude"),
+		);
+		expect(rendered.indexOf("Claude")).toBeLessThan(
+			rendered.indexOf("OpenCode Go"),
+		);
+		expect(rendered.indexOf("OpenCode Go")).toBeLessThan(
 			rendered.indexOf("xAI SuperGrok"),
 		);
 		expect(custom.mock.calls[0]?.[1]).toEqual({
