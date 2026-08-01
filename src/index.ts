@@ -15,14 +15,14 @@ const CLAUDE_PROVIDER = {
 	support: "awaiting-interface",
 	id: "anthropic",
 	displayName: "Claude",
-	explanation: "Waiting for Anthropic to publish a supported Claude allowance interface",
+	explanation: "Waiting for a supported Claude allowance API",
 } satisfies ProviderDefinition;
 
 const OPENCODE_GO_PROVIDER = {
 	support: "awaiting-interface",
 	id: "opencode-go",
 	displayName: "OpenCode Go",
-	explanation: "Waiting for a public OpenCode Go quota API",
+	explanation: "Waiting for a supported OpenCode Go allowance API",
 } satisfies ProviderDefinition;
 
 /** Pi package entry point. Provider work starts only when /meter opens. */

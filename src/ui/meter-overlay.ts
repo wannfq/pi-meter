@@ -227,9 +227,10 @@ export class MeterOverlay implements Component {
 			];
 		}
 
+		const status = unavailableStatus(snapshot);
 		const lines = [
 			this.row(
-				` ${this.theme.fg("accent", snapshot.displayName)} · ${this.theme.fg("warning", "usage unavailable")}`,
+				` ${this.theme.fg("accent", snapshot.displayName)} · ${this.theme.fg("warning", status)}`,
 				innerWidth,
 			),
 		];
@@ -369,6 +370,13 @@ function hasFailureAfterReading(snapshot: LiveProviderSnapshot): boolean {
 			snapshot.latestFailure.failedAt.getTime() >=
 				snapshot.visibleReading.fetchedAt.getTime(),
 	);
+}
+
+function unavailableStatus(snapshot: LiveProviderSnapshot): string {
+	const reason = snapshot.latestFailure?.reason;
+	return reason === "not-configured" || reason === "unauthorized"
+		? "unauthenticated"
+		: "usage unavailable";
 }
 
 function failureMessage(snapshot: LiveProviderSnapshot): string {

@@ -190,13 +190,13 @@ describe("pi-meter extension composition", () => {
 					id: "anthropic",
 					displayName: "Claude",
 					explanation:
-						"Waiting for Anthropic to publish a supported Claude allowance interface",
+						"Waiting for a supported Claude allowance API",
 				},
 				{
 					support: "awaiting-interface",
 					id: "opencode-go",
 					displayName: "OpenCode Go",
-					explanation: "Waiting for a public OpenCode Go quota API",
+					explanation: "Waiting for a supported OpenCode Go allowance API",
 				},
 			]),
 		);
@@ -205,9 +205,9 @@ describe("pi-meter extension composition", () => {
 		const rendered = renders[0]?.join("\n") ?? "";
 		const renderedText = rendered.replaceAll("│", " ").replace(/\s+/g, " ");
 		expect(renderedText).toContain(
-			"Waiting for Anthropic to publish a supported Claude allowance interface",
+			"Waiting for a supported Claude allowance API",
 		);
-		expect(renderedText).toContain("Waiting for a public OpenCode Go quota API");
+		expect(renderedText).toContain("Waiting for a supported OpenCode Go allowance API");
 	});
 
 	it.each([
@@ -223,9 +223,9 @@ describe("pi-meter extension composition", () => {
 		const rendered = renders[0]?.join("\n") ?? "";
 		const renderedText = rendered.replaceAll("│", " ").replace(/\s+/g, " ");
 		expect(renderedText).toContain(
-			"Waiting for Anthropic to publish a supported Claude allowance interface",
+			"Waiting for a supported Claude allowance API",
 		);
-		expect(renderedText).toContain("Waiting for a public OpenCode Go quota API");
+		expect(renderedText).toContain("Waiting for a supported OpenCode Go allowance API");
 		expect(rendered).toContain("OpenAI Codex");
 		expect(rendered).toContain("Claude");
 		expect(rendered).toContain("OpenCode Go");

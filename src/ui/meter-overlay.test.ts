@@ -102,7 +102,7 @@ function awaiting(
 		support: "awaiting-interface",
 		id: "opencode-go",
 		displayName: "OpenCode Go",
-		explanation: "Waiting for a public OpenCode Go quota API",
+		explanation: "Waiting for a supported OpenCode Go allowance API",
 		...overrides,
 	};
 }
@@ -158,7 +158,9 @@ describe("MeterOverlay", () => {
 		expect(output).toContain("Meter");
 		expect(output).toContain("OpenAI Codex  Loading…");
 		expect(output).toContain("OpenCode Go · awaiting interface");
-		expect(output).toContain("Waiting for a public OpenCode Go quota API");
+		expect(output.replaceAll("│", " ").replace(/\s+/g, " ")).toContain(
+			"Waiting for a supported OpenCode Go allowance API",
+		);
 		expect(output).toContain("r refresh · Esc/q close");
 		overlay.dispose();
 	});
@@ -208,6 +210,22 @@ describe("MeterOverlay", () => {
 		expect(output).not.toContain("62% left");
 		overlay.dispose();
 	});
+	it.each(["not-configured", "unauthorized"] as const)(
+		"labels %s auth failures as unauthenticated",
+		(reason) => {
+			const meter = new FakeMeter([
+				live({
+					latestFailure: { reason, failedAt: T0 },
+				}),
+			]);
+			const { overlay } = createOverlay(meter, { now: () => T0 });
+
+			const output = plain(overlay.render(48));
+			expect(output).toContain("OpenAI Codex · unauthenticated");
+			expect(output).not.toContain("usage unavailable");
+			overlay.dispose();
+		},
+	);
 
 	it("styles remaining bar cells as success and used cells as muted", () => {
 		const meter = new FakeMeter([ready()]);
@@ -336,7 +354,7 @@ describe("MeterOverlay", () => {
 			awaiting({
 				displayName: "OpenCode Go 中文日本語",
 				explanation:
-					"Waiting for a public OpenCode Go quota API with a deliberately long explanation 中文日本語",
+					"Waiting for a supported OpenCode Go allowance API with a deliberately long explanation 中文日本語",
 			}),
 		]);
 		const overlay = new MeterOverlay(

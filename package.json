@@ -1,6 +1,6 @@
 {
   "name": "@wannfq/pi-meter",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Provider allowance windows for Pi — displayed in a compact /meter overlay.",
   "license": "MIT",
   "author": "wannfq",
